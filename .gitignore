@@ -1,0 +1,11 @@
+bin/
+obj/
+bin-control/
+obj-control/
+.vs/
+*.user
+publish/
+TestResults/
+obj-package/
+bin-package/
+packout/

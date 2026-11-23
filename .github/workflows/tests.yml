@@ -1,0 +1,35 @@
+name: Tests
+
+# Real Chromium, real HTTP cache, a local server that injects a cacheable 503/404 for one boot resource:
+# the control app (no fix) must stay broken after the host recovers, the fixed app must boot.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    # Playwright does not support Chromium on ubuntu 26.04 (the current ubuntu-latest) yet.
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10'
+
+    # The runner image also carries a newer SDK; build with the SDK this repo targets.
+    - name: Pin the .NET 10 SDK
+      run: |
+        echo '{"sdk":{"version":"10.0.100","rollForward":"latestFeature"}}' > global.json
+        dotnet --version
+
+    - name: Build
+      run: dotnet build SpawnDev.Blazor.BootRecovery.Tests -c Release --nologo
+
+    - name: Install Chromium for Playwright
+      run: pwsh SpawnDev.Blazor.BootRecovery.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+    - name: Test
+      run: dotnet test SpawnDev.Blazor.BootRecovery.Tests -c Release --no-build --nologo --logger "console;verbosity=normal"

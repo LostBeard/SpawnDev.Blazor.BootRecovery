@@ -1,0 +1,42 @@
+name: Deploy to GitHub Pages
+
+on: workflow_dispatch
+
+jobs:
+  deploy-to-github-pages:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10'
+
+    # ubuntu-latest also carries a newer SDK; publish with the SDK this repo targets.
+    - name: Pin the .NET 10 SDK
+      run: |
+        echo '{"sdk":{"version":"10.0.100","rollForward":"latestFeature"}}' > global.json
+        dotnet --version
+
+    - name: Publish the demo
+      run: dotnet publish SpawnDev.Blazor.BootRecovery.Demo -c Release --nologo --output publish
+
+    # The site is served from /SpawnDev.Blazor.BootRecovery/, not the origin root.
+    - name: Set the base href
+      run: sed -i 's|<base href="/" />|<base href="/SpawnDev.Blazor.BootRecovery/" />|' publish/wwwroot/index.html && grep -q 'base href="/SpawnDev.Blazor.BootRecovery/"' publish/wwwroot/index.html
+
+    - name: Copy index.html to 404.html
+      run: cp publish/wwwroot/index.html publish/wwwroot/404.html
+
+    # Allow folders starting with an underscore, such as _framework.
+    - name: Add .nojekyll
+      run: touch publish/wwwroot/.nojekyll
+
+    - name: Commit wwwroot to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: publish/wwwroot

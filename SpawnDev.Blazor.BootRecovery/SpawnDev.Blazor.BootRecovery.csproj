@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>1.0.0</Version>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<EmbedAllSources>true</EmbedAllSources>
+		<DebugType>Embedded</DebugType>
+		<Title>SpawnDev.Blazor.BootRecovery</Title>
+		<Authors>LostBeard</Authors>
+		<Description>Temporary fix for dotnet/runtime#135090: a Blazor WebAssembly app whose browser cached an error (503, 404, empty response) for a fingerprinted boot resource never boots again, even after a hard reload. Reference this package and a failed force-cache boot fetch is retried once with cache: "reload" (integrity kept). No code changes needed.</Description>
+		<PackageProjectUrl>https://github.com/LostBeard/SpawnDev.Blazor.BootRecovery</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageIcon>icon-128.png</PackageIcon>
+		<RepositoryUrl>https://github.com/LostBeard/SpawnDev.Blazor.BootRecovery.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>Blazor;WebAssembly;WASM;cache;force-cache;integrity;boot;workaround</PackageTags>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="Images\icon-128.png" Pack="true" PackagePath="\" />
+		<None Include="..\README.md" Pack="true" PackagePath="\" />
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+</Project>

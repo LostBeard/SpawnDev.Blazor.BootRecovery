@@ -1,0 +1,16 @@
+<Project>
+  <!-- The control build (-p:BootRecovery=false, no fix referenced) restores and builds into its own folders, so publishing both
+       variants back to back never mixes their restore graphs or outputs. Each build excludes BOTH variants' folders from its
+       default items, or it would compile the other variant's generated sources (duplicate assembly attributes). -->
+  <PropertyGroup Condition=" '$(BootRecovery)' == 'false' ">
+    <BaseIntermediateOutputPath>obj-control\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin-control\</BaseOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(BootRecovery)' != 'false' And '$(BootRecoveryPackageVersion)' != '' ">
+    <BaseIntermediateOutputPath>obj-package/</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin-package/</BaseOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**;bin/**;obj-control/**;bin-control/**;obj-package/**;bin-package/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

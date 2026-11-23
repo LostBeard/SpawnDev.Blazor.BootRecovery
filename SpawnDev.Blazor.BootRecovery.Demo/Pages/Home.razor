@@ -1,0 +1,30 @@
+@page "/"
+@inject IJSRuntime JS
+
+<PageTitle>SpawnDev.Blazor.BootRecovery</PageTitle>
+
+<h1>SpawnDev.Blazor.BootRecovery</h1>
+
+<p id="booted">Booted: the .NET runtime started and this page rendered.</p>
+
+<p>
+    A temporary fix for <a href="https://github.com/dotnet/runtime/issues/135090">dotnet/runtime#135090</a>: a Blazor WebAssembly app whose
+    browser cached an error (503, 404, empty response) for a fingerprinted boot resource never boots again, even after a hard reload.
+    This app references <a href="https://github.com/LostBeard/SpawnDev.Blazor.BootRecovery">SpawnDev.Blazor.BootRecovery</a>, which retries
+    such a boot fetch once with <code>cache: "reload"</code>.
+</p>
+
+<p id="recovered">@_recovered</p>
+
+@code {
+    string _recovered = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        // Boot resources this start had to re-fetch (empty on a healthy start, and when the package is not referenced).
+        var n = await JS.InvokeAsync<int>("eval", "(globalThis[Symbol.for('SpawnDev.Blazor.BootRecovery')]?.recovered ?? []).length");
+        _recovered = n == 0 ? "No boot resource needed recovery on this start." : $"Recovered {n} boot resource(s) on this start (see the console).";
+        StateHasChanged();
+    }
+}
