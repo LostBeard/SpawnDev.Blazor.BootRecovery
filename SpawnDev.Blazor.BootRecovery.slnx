@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="SpawnDev.Blazor.BootRecovery.Demo/SpawnDev.Blazor.BootRecovery.Demo.csproj" />
   <Project Path="SpawnDev.Blazor.BootRecovery.Tests/SpawnDev.Blazor.BootRecovery.Tests.csproj" />
+  <Project Path="SpawnDev.Blazor.BootRecovery.WorkersDemo/SpawnDev.Blazor.BootRecovery.WorkersDemo.csproj" />
   <Project Path="SpawnDev.Blazor.BootRecovery/SpawnDev.Blazor.BootRecovery.csproj" />
 </Solution>

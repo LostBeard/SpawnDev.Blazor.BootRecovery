@@ -1,0 +1,25 @@
+@inject IJSRuntime JS
+
+<h1>SpawnDev.Blazor.BootRecovery: web workers</h1>
+
+<p id="booted">Booted: the .NET runtime started in the page and this component rendered.</p>
+
+<p>
+    The page starts a SpawnDev.BlazorJS.WebWorkers worker on request (<code>WorkerProbe.StartWorkerAndPing</code>); the worker boots the .NET
+    runtime again with the same loader, so it needs the same protection from a cached boot error
+    (<a href="https://github.com/dotnet/runtime/issues/135090">dotnet/runtime#135090</a>).
+</p>
+
+<p id="recovered">@_recovered</p>
+
+@code {
+    string _recovered = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        var n = await JS.InvokeAsync<int>("eval", "(globalThis[Symbol.for('SpawnDev.Blazor.BootRecovery')]?.recovered ?? []).length");
+        _recovered = n == 0 ? "No boot resource needed recovery on this start." : $"Recovered {n} boot resource(s) on this start (see the console).";
+        StateHasChanged();
+    }
+}

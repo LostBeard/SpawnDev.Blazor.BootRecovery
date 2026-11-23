@@ -1,0 +1,21 @@
+<Project>
+  <!-- The tests publish this app in several variants back to back:
+       - default:                                   the fix, template settings (fingerprinted blazor.webassembly.js, like AssistZ / ML)
+       - -p:BootRecovery=false:                     the control (no fix)
+       - -p:BootRecoveryPackageVersion=X:           the fix from the PACKED nupkg (release check)
+       - -p:OverrideHtmlAssetPlaceholders=false:    plain JS module names, like SpawnDev.GameUI.Demo / VoxelEngine (the COI service worker page)
+       Each variant restores and builds into its own obj/bin folders so their restore graphs and outputs never mix, and every build
+       excludes all of them from its default items (or it would compile another variant's generated sources). -->
+  <PropertyGroup>
+    <_BootRecoveryVariant Condition=" '$(BootRecovery)' == 'false' ">$(_BootRecoveryVariant)-control</_BootRecoveryVariant>
+    <_BootRecoveryVariant Condition=" '$(BootRecovery)' != 'false' And '$(BootRecoveryPackageVersion)' != '' ">$(_BootRecoveryVariant)-package</_BootRecoveryVariant>
+    <_BootRecoveryVariant Condition=" '$(OverrideHtmlAssetPlaceholders)' == 'false' ">$(_BootRecoveryVariant)-plain</_BootRecoveryVariant>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(_BootRecoveryVariant)' != '' ">
+    <BaseIntermediateOutputPath>obj$(_BootRecoveryVariant)\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin$(_BootRecoveryVariant)\</BaseOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**;bin/**;obj-*/**;bin-*/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

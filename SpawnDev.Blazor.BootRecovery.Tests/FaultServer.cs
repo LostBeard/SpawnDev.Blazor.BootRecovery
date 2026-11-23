@@ -40,6 +40,18 @@ public sealed class FaultServer : IAsyncDisposable
 
     public int RequestsMatching(string fileNamePrefix) => Requests.Where(kv => IsTarget(kv.Key, fileNamePrefix)).Sum(kv => kv.Value);
 
+    /// <summary>
+    /// Requests per path whose Referer contains <see cref="WorkerRefererMarker"/>: the requests a web worker made. A worker's fetches
+    /// carry its script URL as the Referer (the page's carry the page URL). Sec-Fetch-Dest cannot tell them apart: it is "empty"
+    /// for every fetch(), from a page or a worker. Separate from <see cref="Requests"/>, which counts every request.
+    /// </summary>
+    public ConcurrentDictionary<string, int> WorkerRequests { get; } = new();
+
+    /// <summary>The worker script's file name (SpawnDev.BlazorJS.WebWorkers: "spawndev.blazorjs.webworkers.js"); empty = count none.</summary>
+    public string WorkerRefererMarker { get; set; } = "";
+
+    public int WorkerRequestsMatching(string fileNamePrefix) => WorkerRequests.Where(kv => IsTarget(kv.Key, fileNamePrefix)).Sum(kv => kv.Value);
+
     public static async Task<FaultServer> StartAsync(string wwwroot)
     {
         var builder = WebApplication.CreateSlimBuilder();
@@ -51,6 +63,9 @@ public sealed class FaultServer : IAsyncDisposable
         {
             var path = ctx.Request.Path.Value ?? "/";
             self!.Requests.AddOrUpdate(path, 1, (_, n) => n + 1);
+            var referer = ctx.Request.Headers.Referer.ToString();
+            if (self.WorkerRefererMarker.Length > 0 && referer.Contains(self.WorkerRefererMarker, StringComparison.Ordinal))
+                self.WorkerRequests.AddOrUpdate(path, 1, (_, n) => n + 1);
             ctx.Response.Headers.CacheControl = "max-age=600";
             if (self.Outage && IsTarget(path, self.FaultFilePrefix))
             {

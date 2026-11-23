@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <!-- The web-worker case of dotnet/runtime#135090: a SpawnDev.BlazorJS.WebWorkers worker boots the .NET runtime again with the
+       same loader, so a boot file the HTTP cache holds as an error stops the WORKER even though the page is up. Kept out of the main
+       demo so the package and the Pages demo carry no BlazorJS dependency. Used only by the tests (WorkerBootRecoveryTests). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+  </PropertyGroup>
+
+  <!-- -p:BootRecovery=false builds the same app WITHOUT the fix: the tests' control (its worker must stay stuck on a cached error). -->
+  <!-- -p:BootRecoveryPackageVersion=X consumes the PACKED nupkg (local feed) instead of the project (release check). -->
+  <ItemGroup Condition=" '$(BootRecovery)' != 'false' And '$(BootRecoveryPackageVersion)' != '' ">
+    <PackageReference Include="SpawnDev.Blazor.BootRecovery" Version="$(BootRecoveryPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(BootRecovery)' != 'false' And '$(BootRecoveryPackageVersion)' == '' ">
+    <ProjectReference Include="..\SpawnDev.Blazor.BootRecovery\SpawnDev.Blazor.BootRecovery.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.14" PrivateAssets="all" />
+    <PackageReference Include="SpawnDev.BlazorJS.WebWorkers" Version="3.2.8" />
+  </ItemGroup>
+
+</Project>
