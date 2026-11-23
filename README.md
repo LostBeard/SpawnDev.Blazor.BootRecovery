@@ -75,8 +75,7 @@ dotnet test SpawnDev.Blazor.BootRecovery.Tests -c Release
 
 ## Scope and limits
 
-- Tested with .NET 10 standalone Blazor WebAssembly in Chromium. The package targets net8.0, net9.0 and net10.0; the initializer only acts on
-  `force-cache` requests, so it is inert where the loader does not use them.
+- For .NET 10 Blazor WebAssembly apps (the loader whose fingerprinted boot files use `force-cache`), tested standalone in Chromium.
 - The JavaScript modules the runtime imports (`dotnet.js`, `dotnet.native.js`, `dotnet.runtime.js`) are loaded with `import()`, not
   `fetch`. They follow normal HTTP caching (an error expires with its `max-age`), so they are not pinned the same way and are not covered.
 - Blazor Web Apps (interactive WebAssembly) load JS initializers the same way, but this package has not been tested there yet.
