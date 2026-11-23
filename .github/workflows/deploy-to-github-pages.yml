@@ -28,6 +28,10 @@ jobs:
     - name: Set the base href
       run: sed -i 's|<base href="/" />|<base href="/SpawnDev.Blazor.BootRecovery/" />|' publish/wwwroot/index.html && grep -q 'base href="/SpawnDev.Blazor.BootRecovery/"' publish/wwwroot/index.html
 
+    # coi.html and its service worker exist only for the tests (they need the plain-name publish); the live demo is index.html.
+    - name: Drop the test-only service worker page
+      run: rm -f publish/wwwroot/coi.html* publish/wwwroot/blazor-coi-serviceworker.js*
+
     - name: Copy index.html to 404.html
       run: cp publish/wwwroot/index.html publish/wwwroot/404.html
 
