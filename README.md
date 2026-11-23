@@ -66,8 +66,15 @@ with a `503` or `404`; then the outage ends and the visitor reloads.
 | `dotnet.native.wasm` 503 / 404 | stays broken, never asks the server again | boots on the first reload (one re-fetch), next load is a plain cache hit |
 | healthy start | | boots, no recovery, a reload adds no requests |
 
+Every case runs twice:
+- **no service worker**, template publish settings (fingerprinted `blazor.webassembly.js` + import map);
+- **behind a cross-origin-isolation service worker** (`coi.html`, the `blazor-coi-serviceworker.js` many Blazor apps use for
+  `SharedArrayBuffer`), with plain script names (`OverrideHtmlAssetPlaceholders=false`). Every boot fetch then goes through the service
+  worker's `fetch(event.request)`, which carries the retry's `cache: "reload"` to the HTTP cache. Each load also asserts the page really
+  is controlled by the service worker, so this half cannot pass vacuously.
+
 The control is the same demo app published without the package (`-p:BootRecovery=false`), so the tests reproduce the bug itself, not
-only the fix.
+only the fix. 18 tests; breaking the fix (retrying with `force-cache` instead of `reload`) fails all 8 fix cases.
 
 ```
 dotnet test SpawnDev.Blazor.BootRecovery.Tests -c Release

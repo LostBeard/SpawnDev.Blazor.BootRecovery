@@ -9,3 +9,5 @@ TestResults/
 obj-package/
 bin-package/
 packout/
+obj-*/
+bin-*/
