@@ -30,11 +30,13 @@ function urlOf(input) {
     return String(input);                                            // URL or anything with toString()
 }
 
-/**
- * Installs the recovering fetch wrapper on globalThis once (idempotent, also across copies of this module).
- * @returns {{ originalFetch: Function, recovered: Array<{url: string, reason: string, status: number}> } | null}
- */
-export function installBootRecovery() {
+// ⚠️ The installer is a plain, NON-exported function declaration, and nothing in this module calls an exported function by name.
+// SpawnDev.BlazorJS.WebWorkers (when a worker cannot use dynamic import, or the app has an import map, i.e. every .NET 10 template app)
+// rewrites this module's source: `export function X()` becomes `_exportsOverride.X = function X()`, a function EXPRESSION, which
+// leaves no `X` binding in the module scope. 1.0.0 called its exported installBootRecovery() at the top level, so in such a worker the
+// module threw "ReferenceError: installBootRecovery is not defined" and the worker failed to boot (found by Data, 2026-11-22). A
+// plain declaration is not rewritten and stays hoisted, so this works with that patcher and without it.
+function install() {
     const g = globalThis;
     if (g[STATE_KEY]) return g[STATE_KEY];
     const originalFetch = g.fetch;
@@ -66,10 +68,16 @@ export function installBootRecovery() {
     return state;
 }
 
+/**
+ * Installs the recovering fetch wrapper on globalThis once (idempotent, also across copies of this module).
+ * @returns {{ originalFetch: Function, recovered: Array<{url: string, reason: string, status: number}> } | null}
+ */
+export function installBootRecovery() { return install(); }
+
 // Install as soon as Blazor imports this module.
-installBootRecovery();
+install();
 
 // Blazor initializer hooks. Blazor calls the WebAssembly-specific hook when present, the classic one otherwise; both only ensure
 // the wrapper is installed (for example if something replaced fetch between the import and the start).
-export function beforeWebAssemblyStart() { installBootRecovery(); }
-export function beforeStart() { installBootRecovery(); }
+export function beforeWebAssemblyStart() { install(); }
+export function beforeStart() { install(); }
